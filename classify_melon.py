@@ -13,7 +13,6 @@ from PIL import Image
 # setting device on GPU if available, else CPU
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-
 class MelonClassifier(object):
 
     def __init__(self) -> None:
@@ -106,13 +105,12 @@ class MelonClassifier(object):
         # Put model in eval mode
         model_ft.eval()
         
-
         return model_ft, input_size
 
 
 
-    # Input: PIL Image
-    # Output: String = "melon" or "not_melon"
+    # Input: Bytes.IO Image
+    # Output: boolean True or False
     def classify(self, img):
 
         class_names = ("melon", "not melon")
@@ -128,12 +126,13 @@ class MelonClassifier(object):
 
 
         # Class label, Confidence
-        label, confidence = [class_names[x] for x in preds][0], outputs[0]
+        label, confidence = [class_names[x] for x in preds][0], outputs[0][0]
 
-        print(label)
-        print(confidence[0])
+        # Print label and confidence
+        # print(label)
+        # print(confidence)
 
-        if label == "melon" and confidence[0] > 1.0:
+        if label == "melon" and confidence > 1.0:
             return True
         else:
             return False
@@ -151,7 +150,6 @@ def time_classify(melon, img_path):
     pred, confidence = melon.classify(img)
     
     print(f"actual:{img_path}\npred: {pred}\nconfidence: {confidence}\ntime: {time.time()-start}\n")
-
 
 
 if __name__ == "__main__":
