@@ -7,16 +7,17 @@ from torchvision import datasets, models, transforms
 # Others
 import numpy as np
 import time
+from PIL import Image
 
 
 # setting device on GPU if available, else CPU
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
-class Classifier(object):
+class MelonClassifier(object):
 
     def __init__(self) -> None:
-        self.MODEL_NAME = "./trained_models/melon_squeezenet_data3_20211104-212820.pth"
+        self.MODEL_NAME = "melon_ml/trained_models/melon_squeezenet_data3_20211104-212820.pth"
         self.model, self.input_size = self.initialize_model("squeezenet", 2, feature_extract=True)
 
         self.data_transforms =  transforms.Compose([
@@ -116,6 +117,8 @@ class Classifier(object):
 
         class_names = ("melon", "not melon")
 
+        img = Image.open(img).convert("RGB")
+
         t_image = self.data_transforms(img)
 
         with torch.no_grad(): 
@@ -125,32 +128,39 @@ class Classifier(object):
 
 
         # Class label, Confidence
-        return [class_names[x] for x in preds], outputs[0]
+        label, confidence = [class_names[x] for x in preds][0], outputs[0]
+
+        print(label)
+        print(confidence[0])
+
+        if label == "melon" and confidence[0] > 1.0:
+            return True
+        else:
+            return False
 
 
-def time_classify(melon, img_name):
+def time_classify(melon, img_path):
 
     from PIL import Image
 
     img_path = "test_cases/{}.jpeg".format
-    img = Image.open(img_path(img_name)).convert("RGB")
+    img = Image.open(img_path(img_path)).convert("RGB")
 
     start = time.time()
 
     pred, confidence = melon.classify(img)
     
-    print(f"actual:{img_name}\npred: {pred}\nconfidence: {confidence}\ntime: {time.time()-start}\n")
+    print(f"actual:{img_path}\npred: {pred}\nconfidence: {confidence}\ntime: {time.time()-start}\n")
 
 
 
 if __name__ == "__main__":
+    pass
+    # Example run
 
-    melon = Classifier()
+    # melon = Classifier()
 
-    imgs = ["a", "b", "c", "d", "e", "f", "g"]
-
-    for i in imgs:
-        time_classify(melon, i)
+    # time_classify(melon, img_path)
     
 
 
